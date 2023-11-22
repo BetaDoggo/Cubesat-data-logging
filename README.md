@@ -1,2 +1,2 @@
 # Cubesat-data-logging
-The code for recording the data revieved from the serial monitor WIP PRs welcome
+The code for recording the data recieved from the serial monitor WIP PRs welcome
