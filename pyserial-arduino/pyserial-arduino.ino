@@ -1,7 +1,7 @@
-//Basic example code showing the format for returning data
-//to do: refactor with sprintf
+//code used to output data in csv format
+//WIP: add code to output to data board - might be able to use the unmodified buffer, can't test yet
 
-int i = 0; //very basic timestamp for now
+int i = 0; //very basic relative timestamp for now - will be replaced with RTC when we get the data board
 //sensor data variables - could be an array but this is easier for now
 float timestamp;
 float altitude;
@@ -25,7 +25,7 @@ char SZaccel[10];
 char Sradiation[10];
 char Suv[10]; //vroom vroom
 
-char buffer[1000]; //too big buffer to hold the sprintf data, uses 50% of ram lol
+char buffer[120]; //buffer to transport buffer data - oversized for testing, resize later
 
 void floatFix() { //sprintf can't handle floats so we need strings instead
   dtostrf(timestamp, 1, 2, Stimestamp); //first number is minimum length, second is digits after decimal
@@ -60,7 +60,7 @@ void loop() {
   floatFix(); //must be run to convert float variables to strings
   sprintf(buffer, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", Stimestamp,Saltitude,Sbarometer,Stemp,Spressure,SXaccel,SYaccel,SZaccel,Sradiation,Suv);
   Serial.println(buffer);
-  delay(1000); //for testing - can go lower but must match the python logging script
+  delay(1000); //1s for testing - can go lower but must match the python logging script
   i = i + 1;
 }
 
