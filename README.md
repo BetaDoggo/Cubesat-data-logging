@@ -1,6 +1,11 @@
 # Cubesat-data-logging - WIP
 This repo contains an alternative method for recording data sent from the serial monitor. This aproach is OS and software agnostic, all you need is python 3.9+.
 
+# What it does:
+1. Gets serial output from the arduino
+2. Puts it into csv format
+3. Outputs to test.csv
+
 # How to use:
 1. Clone the repo
 2. install the dependancies for the python script
