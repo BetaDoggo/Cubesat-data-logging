@@ -63,4 +63,3 @@ void loop() {
   delay(1000); //1s for testing - can go lower but must match the python logging script
   i = i + 1;
 }
-

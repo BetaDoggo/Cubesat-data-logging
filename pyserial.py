@@ -4,12 +4,14 @@ import time
 
 serialport = '/dev/ttyACM0'
 record_delay = 1
+file = 'test.csv'
+mode = 'w' #write mode - a to append, w to overwrite.
 
 def main():
     ser = serial.Serial(serialport, 115200) #init serial monitor
     rowcount = 0
     time.sleep(2)
-    with open('test.csv', mode='w') as output_storage:
+    with open(file, mode=mode) as output_storage:
         output_storage = csv.writer(output_storage, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
         output_storage.writerow(["timestamp: ","altitude: ","Baro: ","temp: ","pressure: ","accel(X): ","accel(Y): ","accel(Z): ","Rad: ", "UV: "])
         while True:
@@ -23,8 +25,7 @@ def main():
                 print("row " + str(rowcount))
             except Exception as e:
                 #print(e)
-                print("Serial bad 💢")
+                print("Incomplete output 💢💢💢")
             time.sleep(record_delay)
-            
 
 main()
