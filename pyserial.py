@@ -12,8 +12,8 @@ def main():
     rowcount = 0
     time.sleep(2)
     with open(file, mode=mode) as output_storage:
-        output_storage = csv.writer(output_storage, delimiter=",", quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        output_storage.writerow(["timestamp: ","altitude: ","Baro: ","temp: ","pressure: ","accel(X): ","accel(Y): ","accel(Z): ","Rad: ", "UV: "])
+        output_storage = csv.writer(output_storage, delimiter=",", quoting=csv.QUOTE_MINIMAL)
+        output_storage.writerow(["timestamp: ","altitude: ","baro: ","temp: ","pressure: ","accel(X): ","accel(Y): ","accel(Z): ","Rad: ", "UV: "])
         while True:
             output = ser.readline()
             output = output.decode('utf-8')
