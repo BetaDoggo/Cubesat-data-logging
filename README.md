@@ -9,8 +9,13 @@ This repo contains an alternative method for recording data sent from the serial
 # How to use:
 1. Clone the repo
 2. install the dependancies for the python script
+3. Change the serial_port and file variables to match your setup
 3. Flash the code to the arduino
 4. Connect the arduio and run the python script
+(Optional - Google sheets support)
+1. Set the online_mode variable to 1
+2. Get your sheet_id and account token by reading the following: https://denisluiz.medium.com/python-with-google-sheets-service-account-step-by-step-8f74c26ed28e
+3. Replace each value in the script
 
 # Pros:
 1. FOSS

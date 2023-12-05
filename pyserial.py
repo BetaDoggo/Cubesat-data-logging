@@ -10,16 +10,17 @@ import time
 serialport = '/dev/ttyACM0'
 record_delay = 1
 file = 'test.csv' #local output file
-mode = 'w' #write mode - a to append, w to overwrite.
+mode = 'w' #write mode - a to append, w to overwrite. - csv only
 sheet_id = "1sEDggr_FbgNbnXzKLG-3iYj2N4-BMM2zQLfWGCZCi6g" #spreadsheet id, only if outputing to google sheets
+token = ("/home/mrp/Desktop/auth.json") #service account credentials
+online_mode = 0 # Whether or not to write to google sheet
 
 def auth(): #authenticate api
     global api
     try:
         scopes = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/spreadsheets"]
-        token = ("/home/mrp/Desktop/auth.json")
         creds = service_account.Credentials.from_service_account_file(token, scopes=scopes)
-        api = discovery.build("sheets", "v4", credentials=creds) #sheet object used for writing
+        api = discovery.build("sheets", "v4", credentials=creds) 
     except Exception as e:
         print(e)
 
@@ -40,16 +41,19 @@ def main():
         #print(data) #uncomment for a live feed in terminal
         try: #catch incomplete/broken data
             output_storage.writerow([data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]]) #could be done with a loop but this is more explicit
-            #write to online sheet - comment out to disable
-            values =[[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]],[]] 
-            sheet_output = {"values" : values}
-            api.spreadsheets().values().update(spreadsheetId=sheet_id, body=sheet_output, range=range, valueInputOption='USER_ENTERED').execute()
             row = row + 1
         except Exception as e:
             #print(e) 
             print("Incomplete output 💢💢💢")
+        if (online_mode == 1): #google
+            try:
+                values = [[data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]],[]] #data must be 2d list 🤓
+                sheet_output = {"values" : values}
+                api.spreadsheets().values().update(spreadsheetId=sheet_id, body=sheet_output, range=range, valueInputOption='USER_ENTERED').execute()
+            except():
+                print("Writing to Google sheets failed")
         time.sleep(record_delay)
         
-
-auth()
+if (online_mode == 1):
+    auth()
 main()
