@@ -1,8 +1,10 @@
 //code used to output data in csv format
 //WIP: add code to output to data board - might be able to use the unmodified buffer, can't test yet
+//Use the rtc on the databoard for the timestamp
 
-int i = 0; //very basic relative timestamp for now - will be replaced with RTC when we get the data board
+int i = 0; //Message count - used to measure loss
 //sensor data variables - could be an array but this is easier for now
+float MessageNum;
 float timestamp;
 float altitude;
 float barometer;
@@ -15,6 +17,7 @@ float radiation;
 float uv;
 //string versions for use with sprintf - 10 is probably more than enough, adjust for memory budget
 char Stimestamp[10];
+char SMessageNum[10];
 char Saltitude[10];
 char Sbarometer[10];
 char Stemp[10];
@@ -29,6 +32,7 @@ char buffer[120]; //buffer to transport buffer data - oversized for testing, res
 
 void floatFix() { //sprintf can't handle floats so we need strings instead
   dtostrf(timestamp, 1, 2, Stimestamp); //first number is minimum length, second is digits after decimal
+  dtostrf(MessageNum, 1, 2, SMessageNum);
   dtostrf(altitude, 1, 2, Saltitude);
   dtostrf(barometer, 1, 2, Sbarometer);
   dtostrf(temp, 1, 2, Stemp);
@@ -46,7 +50,8 @@ void setup() {
 
 void loop() {
   //random values for testing
-  timestamp = i;
+  MessageNum = i;
+  timestamp = 0; //not implemented yet
   altitude = random(5);
   barometer = random(5);
   temp = random(5);
@@ -58,7 +63,7 @@ void loop() {
   uv = random(5);
   //--------------Data collection code goes above----------
   floatFix(); //must be run to convert float variables to strings
-  sprintf(buffer, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", Stimestamp,Saltitude,Sbarometer,Stemp,Spressure,SXaccel,SYaccel,SZaccel,Sradiation,Suv);
+  sprintf(buffer, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", SMessageNum,Stimestamp,Saltitude,Sbarometer,Stemp,Spressure,SXaccel,SYaccel,SZaccel,Sradiation,Suv);
   Serial.println(buffer);
   delay(1000); //1s for testing - can go lower but must match the python logging script
   i = i + 1;
