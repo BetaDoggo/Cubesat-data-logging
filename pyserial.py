@@ -14,7 +14,7 @@ file = 'test.csv' #local output file
 mode = 'w' #write mode - a to append, w to overwrite. - csv only
 sheet_id = "1sEDggr_FbgNbnXzKLG-3iYj2N4-BMM2zQLfWGCZCi6g" #spreadsheet id, only if outputing to google sheets
 token = ("/home/mrp/Desktop/auth.json") #service account credentials
-online_mode = 1 # Whether or not to write to google sheet
+online_mode = 0 # Whether or not to write to google sheet
 
 def auth(): #authenticate api
     global api
@@ -50,7 +50,7 @@ def main():
                     sheet_output = {"values" : values}
                     api.spreadsheets().values().update(spreadsheetId=sheet_id, body=sheet_output, range=range, valueInputOption='USER_ENTERED').execute()
                 except Exception as e:
-                    print(e)
+                    #print(e)
                     print("Writing to Google sheets failed")
         except Exception as e:
             #print(e) 
