@@ -2,7 +2,6 @@ import httplib2
 from apiclient import discovery
 from google.oauth2 import service_account
 
-import os
 import serial
 import csv
 import time
@@ -33,7 +32,7 @@ def main():
     csv_file = open(file, mode=mode) #open file
     output_storage = csv.writer(csv_file, delimiter=",")
     time.sleep(2) #delay for arduino startup
-    output_storage.writerow(["Recorded time","Arduino time","row","altitude","barometer","temp","pressure","accel(X)","accel(Y)","accel(Z)","Radiation", "UV"]) #write heading
+    output_storage.writerow(["Recorded time","Arduino time","row","altitude","Internal temp","External temp","pressure","accel(X)","accel(Y)","accel(Z)","Radiation", "UV"]) #write heading
     while True:
         range = ("Sheet1!A" + str(row) + ":L" + str(row)) #sets the range for the online sheet
         output = ser.readline()
