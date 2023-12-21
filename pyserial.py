@@ -17,16 +17,34 @@ online_mode = 0 # Whether or not to write to google sheet
 
 def auth(): #authenticate api
     global api
+    global sheet_name
     try:
         scopes = ["https://www.googleapis.com/auth/drive", "https://www.googleapis.com/auth/drive.file", "https://www.googleapis.com/auth/spreadsheets"]
         creds = service_account.Credentials.from_service_account_file(token, scopes=scopes)
         api = discovery.build("sheets", "v4", credentials=creds) 
+        #create new sheet
+        sheet_name = str(datetime.datetime.now())
+        body = {
+            "requests":{
+                "addSheet":{
+                    "properties":{
+                        "title":sheet_name
+                    }
+                }
+            }
+        }
+        api.spreadsheets().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
+        #write heading
+        values = [["Message #","Recorded Time","Arduino time","Altitude","External Temp","Internal Temp","Pressure","Accel(X)","Accel(Y)","Accel(Z)","Radiation","UV"],[]] #data must be 2d list 🤓
+        sheet_output = {"values" : values}
+        range = (str(sheet_name) + "!A1:L1")
+        api.spreadsheets().values().update(spreadsheetId=sheet_id, body=sheet_output, range=range, valueInputOption='USER_ENTERED').execute()
     except Exception as e:
         print(e)
 
-
 def main():
     global api
+    global sheet_name
     row = 2 #stores the row count - start at two because of heading
     ser = serial.Serial(serialport, 115200) #init serial monitor
     csv_file = open(file, mode=mode) #open file
@@ -34,7 +52,7 @@ def main():
     time.sleep(2) #delay for arduino startup
     output_storage.writerow(["Recorded time","Arduino time","row","altitude","Internal temp","External temp","pressure","accel(X)","accel(Y)","accel(Z)","Radiation", "UV"]) #write heading
     while True:
-        range = ("Sheet1!A" + str(row) + ":L" + str(row)) #sets the range for the online sheet
+        range = (str(sheet_name) + "!A" + str(row) + ":L" + str(row)) #sets the range for the online sheet
         output = ser.readline()
         recordtime = datetime.datetime.now() #get time of retrieval - backup for rtc on arduino, also
         output = output.decode('utf-8')
@@ -49,7 +67,7 @@ def main():
                     sheet_output = {"values" : values}
                     api.spreadsheets().values().update(spreadsheetId=sheet_id, body=sheet_output, range=range, valueInputOption='USER_ENTERED').execute()
                 except Exception as e:
-                    #print(e)
+                    print(e)
                     print("Writing to Google sheets failed")
         except Exception as e:
             #print(e) 
