@@ -100,6 +100,7 @@ void loop() {
   Zaccel = 0;
   radiation = 0;
   uv = 0;
+  readAltimeter();
   uv = uv_sensor.readUVI(); //function from library
   readTemp(); //will be removed once altimeter is finalized
   //--------------Data collection code goes above----------
