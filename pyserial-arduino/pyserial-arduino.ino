@@ -1,6 +1,10 @@
 //code used to output data in csv format
 //WIP: add code to output to data board - might be able to use the unmodified buffer, can't test yet
 //Use the rtc on the databoard for the timestamp
+#include <Adafruit_VEML6075.h> //UV library
+#include <Adafruit_Sensor.h> //Required for altimeter
+#include <Adafruit_BMP3XX.h> //Altimeter library
+#include <Wire.h> //Required for I2C, used by UV sensor
 //////////////temperature variables//////////////
 const int lm35_pin1 = A1; //inside temp pin
 const int lm35_pin2 = A2; //outside temp pin
@@ -9,6 +13,9 @@ float temp_val1; //stores converted temp reading
 int temp_adc_val2;
 float temp_val2;
 ////////////////////////////////////////////////
+#define SEALEVELPRESSURE_HPA (1013.25) //used for eval
+Adafruit_VEML6075 uv_sensor = Adafruit_VEML6075(); //UV
+Adafruit_BMP3XX bmp; //Altimeter
 int i = 0; //Message count - used to measure loss - not trust worthy, time travel has been observed
 //sensor data variables - could be an array but this is easier for now
 float MessageNum;
@@ -62,12 +69,26 @@ void floatFix() { //sprintf can't handle floats so we need strings instead
   dtostrf(uv, 1, 2, Suv);
 }
 
+void readAltimeter(){ //altimeter reading function
+  bmp.performReading();
+  altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA);
+  //Inttemp = bmp.temperature //not in use right now
+  pressure = (bmp.pressure / 100); //pressure in hPa
+}
+
 void setup() {
   Serial.begin(115200);
+  uv_sensor.begin(); //init UV serial connection
+  bmp.begin_I2C(); //init altimeter serial connection
+  //bmp filter init
+  bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
+  bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
+  bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
+  bmp.setOutputDataRate(BMP3_ODR_50_HZ);
 }
 
 void loop() {
-  //random values for testing
+  //reset values to prevent duplicates on failure
   MessageNum = i;
   timestamp = 0; //not implemented yet
   altitude = 0;
@@ -79,7 +100,8 @@ void loop() {
   Zaccel = 0;
   radiation = 0;
   uv = 0;
-  readTemp();
+  uv = uv_sensor.readUVI(); //function from library
+  readTemp(); //will be removed once altimeter is finalized
   //--------------Data collection code goes above----------
   floatFix(); //must be run to convert float variables to strings
   sprintf(buffer, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", SMessageNum,Stimestamp,Saltitude,SExtemp,SInttemp,Spressure,SXaccel,SYaccel,SZaccel,Sradiation,Suv);
