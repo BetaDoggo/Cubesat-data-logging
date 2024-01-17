@@ -137,8 +137,8 @@ void setup() {
 void loop() {
   MessageNum = i;
   clearSensors(); //empty the sensor variables to prevent duplicate values
-  readMPU();
-  readAltimeter();
+  //readMPU();
+  //readAltimeter();
   uv = uv_sensor.readUVI(); //function from library
   readTemp(); //will be removed once altimeter is finalized
   //--------------Data collection code goes above----------
