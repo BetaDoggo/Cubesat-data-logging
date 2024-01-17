@@ -16,7 +16,6 @@ int temp_adc_val2;
 float temp_val2;
 ////////////////////////////////////////////////
 const int MPU = 0x68; //gyro I2C address
-int16_t AcX,AcY,AcZ,Tmp,GyX,GyY,GyZ; //gyro variables
 //altimeter pins
 #define BMP_SCK 13
 #define BMP_MISO 12
@@ -103,6 +102,21 @@ void readMPU(){ //reads the gyro/accel
   ZGyro=Wire.read()<<8|Wire.read(); 
 }
 
+void clearSensors(){ //clears sensor variables
+  timestamp = 0; //not implemented yet
+  altitude = 0;
+  Extemp = 0;
+  Inttemp = 0;
+  pressure = 0;
+  Xaccel = 0;	
+  Yaccel = 0;
+  Zaccel = 0;
+  XGyro = 0;
+  YGyro = 0;
+  ZGyro = 0;
+  uv = 0;
+}
+
 void setup() {
   Serial.begin(115200);//kind of high, can change later
   uv_sensor.begin(); //init UV serial connection
@@ -121,20 +135,8 @@ void setup() {
 }
 
 void loop() {
-  //reset values to prevent duplicates on failure
   MessageNum = i;
-  timestamp = 0; //not implemented yet
-  altitude = 0;
-  Extemp = 0;
-  Inttemp = 0;
-  pressure = 0;
-  Xaccel = 0;	
-  Yaccel = 0;
-  Zaccel = 0;
-  XGyro = 0;
-  YGyro = 0;
-  ZGyro = 0;
-  uv = 0;
+  clearSensors(); //empty the sensor variables to prevent duplicate values
   readMPU();
   readAltimeter();
   uv = uv_sensor.readUVI(); //function from library
@@ -144,5 +146,5 @@ void loop() {
   sprintf(buffer, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", SMessageNum,Stimestamp,Saltitude,SExtemp,SInttemp,Spressure,SXaccel,SYaccel,SZaccel,SXGyro,SYGyro,SZGyro,Suv);
   Serial.println(buffer);
   delay(1000); //1s for testing - can go lower but must match the python logging script
-  i = i + 1;
+  i++;
 }
