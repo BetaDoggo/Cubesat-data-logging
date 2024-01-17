@@ -35,9 +35,9 @@ def auth(): #authenticate api
         }
         api.spreadsheets().batchUpdate(spreadsheetId=sheet_id, body=body).execute()
         #write heading
-        values = [["Message #","Recorded Time","Arduino time","Altitude","External Temp","Internal Temp","Pressure","Accel(X)","Accel(Y)","Accel(Z)","Radiation","UV"],[]] #data must be 2d list 🤓
+        values = [["Message #","Recorded Time","Arduino time","Altitude","External Temp","Internal Temp","Pressure","Accel(X)","Accel(Y)","Accel(Z)","Gyro(X)","Gyro(Y)","Gyro(Z)","UV"],[]] #data must be 2d list 🤓
         sheet_output = {"values" : values}
-        range = (str(sheet_name) + "!A1:L1")
+        range = (str(sheet_name) + "!A1:N1")
         api.spreadsheets().values().update(spreadsheetId=sheet_id, body=sheet_output, range=range, valueInputOption='USER_ENTERED').execute()
     except Exception as e:
         print(e)
@@ -50,7 +50,7 @@ def main():
     csv_file = open(file, mode=mode) #open file
     output_storage = csv.writer(csv_file, delimiter=",")
     time.sleep(2) #delay for arduino startup
-    output_storage.writerow(["Recorded time","Arduino time","row","altitude","Internal temp","External temp","pressure","accel(X)","accel(Y)","accel(Z)","Radiation", "UV"]) #write heading
+    output_storage.writerow(["Recorded time","Arduino time","row","altitude","Internal temp","External temp","pressure","accel(X)","accel(Y)","accel(Z)","Gyro(X)","Gyro(Y)","Gyro(Z)", "UV"]) #write heading
     while True:  
         output = ser.readline()
         recordtime = datetime.datetime.now() #get time of retrieval - backup for rtc on arduino, also
@@ -58,11 +58,11 @@ def main():
         data = str(output).split(",")
         #print(data) #uncomment for a live feed in terminal
         try: #catch incomplete/broken data
-            output_storage.writerow([data[0],recordtime,data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],data[10]]) #could be done with a loop but this is more explicit
+            output_storage.writerow([data[0],recordtime,data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],data[10],data[11],data[12]]) #could be done with a loop but this is more explicit
             if (online_mode == 1): #send to sheets
                 try:
-                    range = (str(sheet_name) + "!A" + str(row) + ":L" + str(row)) #sets the range for the online sheet
-                    values = [[data[0],str(recordtime),data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],data[10]],[]] #data must be 2d list 🤓
+                    range = (str(sheet_name) + "!A" + str(row) + ":N" + str(row)) #sets the range for the online sheet
+                    values = [[data[0],str(recordtime),data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],data[10]],data[11],data[12],[]] #data must be 2d list 🤓
                     sheet_output = {"values" : values}
                     api.spreadsheets().values().update(spreadsheetId=sheet_id, body=sheet_output, range=range, valueInputOption='USER_ENTERED').execute()
                 except Exception as e:
