@@ -93,7 +93,7 @@ void readMPU(){ //reads the gyro/accel
   Wire.beginTransmission(MPU);
   Wire.write(0x3B);  
   Wire.endTransmission(false);
-  Wire.requestFrom(MPU,12,true);  
+  Wire.requestFrom(MPU,12,true); //stall point 
   Xaccel=Wire.read()<<8|Wire.read();    
   Yaccel=Wire.read()<<8|Wire.read();  
   Zaccel=Wire.read()<<8|Wire.read();  
