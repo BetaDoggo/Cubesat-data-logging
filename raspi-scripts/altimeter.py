@@ -17,6 +17,6 @@ output_storage.writerow(["Pressure","Temperature","Altitude"])
 while True:
     Pressure = bmp.pressure
     Temperature = bmp.temperature
-    Altitude = bmp.altitude(1013.25)
+    Altitude = bmp.altitude
     output_storage.writerow([Pressure,Temperature,Altitude])
     time.sleep(1)
