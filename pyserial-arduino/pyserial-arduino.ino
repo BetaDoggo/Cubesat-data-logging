@@ -1,10 +1,10 @@
 //The code for returning data over the serial monitor.
 //Use this with the accompanying python script
 //for the sake of readability any sensors that require more than 1 line to read are put into their own functions.
-//to do - add in remaining sensors
-#include <Adafruit_VEML6075.h> //UV library
+//to do - add remaining sensors
+#include "Adafruit_VEML6075.h" //UV library
 #include <Adafruit_Sensor.h> //Required for altimeter
-#include <Adafruit_BMP3XX.h> //Altimeter library
+#include "Adafruit_BMP3XX.h" //Altimeter library
 #include <Wire.h> //Required for I2C, used by UV sensor
 #include <SPI.h> //Required to setup altimeter
 //////////////temperature variables//////////////
@@ -29,10 +29,10 @@ int i = 0; //Message count - used to measure loss - not trust worthy, time trave
 //sensor data variables - could be an array but this is easier for now
 float MessageNum;
 float timestamp;
-float altitude;
+float altitude; //from altimeter
 float Extemp;
 float Inttemp;
-float pressure;
+float pressure; //from altimeter
 float Xaccel;	
 float Yaccel;
 float Zaccel;
@@ -55,7 +55,7 @@ char SYGyro[10];
 char SZGyro[10];
 char Suv[10]; //vroom vroom
 
-char buffer[120]; //buffer to transport buffer data - oversized for testing, resize later
+char buffer[200]; //buffer to transport buffer data - oversized for testing, resize later
 
 void readTemp(){ //temperature reading function
   temp_adc_val1 = analogRead(lm35_pin1); //get internal temp pin output
@@ -84,9 +84,8 @@ void floatFix() { //sprintf can't handle floats so we need strings instead
 
 void readAltimeter(){ //altimeter reading function
   bmp.performReading();
+  pressure = (bmp.pressure / 100.0);
   altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA);
-  //Inttemp = bmp.temperature //not in use right now
-  pressure = (bmp.pressure / 100); //pressure in hPa
 }
 
 void readMPU(){ //reads the gyro/accel
@@ -101,6 +100,7 @@ void readMPU(){ //reads the gyro/accel
   YGyro=Wire.read()<<8|Wire.read();  
   ZGyro=Wire.read()<<8|Wire.read(); 
 }
+
 
 void clearSensors(){ //clears sensor variables
   timestamp = 0; //not implemented yet
@@ -120,8 +120,8 @@ void clearSensors(){ //clears sensor variables
 void setup() {
   Serial.begin(115200);//kind of high, can change later
   uv_sensor.begin(); //init UV serial connection
-  bmp.begin_SPI(BMP_CS, BMP_SCK, BMP_MISO, BMP_MOSI); //init altimeter in software SPI mode
   //bmp filter init
+  bmp.begin_I2C(); //init altimeter in software I2C mode
   bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
   bmp.setPressureOversampling(BMP3_OVERSAMPLING_4X);
   bmp.setIIRFilterCoeff(BMP3_IIR_FILTER_COEFF_3);
@@ -137,9 +137,9 @@ void setup() {
 void loop() {
   MessageNum = i;
   clearSensors(); //empty the sensor variables to prevent duplicate values
-  //readMPU();
-  //readAltimeter();
-  uv = uv_sensor.readUVI(); //function from library
+  readMPU();
+  readAltimeter();
+  //uv = uv_sensor.readUVI(); //function from library
   readTemp(); //will be removed once altimeter is finalized
   //--------------Data collection code goes above----------
   floatFix(); //must be run to convert float variables to strings
