@@ -16,19 +16,19 @@ int temp_adc_val2;
 float temp_val2;
 ////////////////////////////////////////////////
 const int MPU = 0x68; //gyro I2C address
-//altimeter pins
+///////////altimeter pins////////////////////////////
 #define BMP_SCK 13
 #define BMP_MISO 12
 #define BMP_MOSI 11
 #define BMP_CS 10
-#define SEALEVELPRESSURE_HPA (1013.25) //used by altimeter for eval
+#define LocalPressure_HPA (1013.25) //used by altimeter for eval
 Adafruit_BMP3XX bmp; //Altimeter
 //////////////
 Adafruit_VEML6075 uv_sensor = Adafruit_VEML6075(); //UV
 int i = 0; //Message count - used to measure loss - not trust worthy, time travel has been observed
 //sensor data variables - could be an array but this is easier for now
 float MessageNum;
-float timestamp;
+float altTemp;
 float altitude; //from altimeter
 float Extemp;
 float Inttemp;
@@ -41,7 +41,7 @@ float YGyro;
 float ZGyro;
 float uv;
 //string versions for use with sprintf - 10 is probably more than enough, adjust for memory budget
-char Stimestamp[10];
+char SaltTemp[10];
 char SMessageNum[10];
 char Saltitude[10];
 char SExtemp[10];
@@ -55,7 +55,7 @@ char SYGyro[10];
 char SZGyro[10];
 char Suv[10]; //vroom vroom
 
-char buffer[200]; //buffer to transport buffer data - oversized for testing, resize later
+char buffer[140]; //buffer to transport buffer data - oversized for testing, resize later
 
 void readTemp(){ //temperature reading function
   temp_adc_val1 = analogRead(lm35_pin1); //get internal temp pin output
@@ -67,7 +67,7 @@ void readTemp(){ //temperature reading function
 }
 
 void floatFix() { //sprintf can't handle floats so we need strings instead
-  dtostrf(timestamp, 1, 2, Stimestamp); //first number is minimum length, second is digits after decimal
+  dtostrf(altTemp, 1, 2, SaltTemp); //first number is minimum length, second is digits after decimal
   dtostrf(MessageNum, 1, 2, SMessageNum);
   dtostrf(altitude, 1, 2, Saltitude);
   dtostrf(Extemp, 1, 2, SExtemp);
@@ -83,9 +83,12 @@ void floatFix() { //sprintf can't handle floats so we need strings instead
 }
 
 void readAltimeter(){ //altimeter reading function
-  bmp.performReading();
+  if (! bmp.performReading()){ //preve
+    return;
+  }
+  altTemp = bmp.temperature;
   pressure = (bmp.pressure / 100.0);
-  altitude = bmp.readAltitude(SEALEVELPRESSURE_HPA);
+  altitude = bmp.readAltitude(LocalPressure_HPA);
 }
 
 void readMPU(){ //reads the gyro/accel
@@ -103,10 +106,12 @@ void readMPU(){ //reads the gyro/accel
 
 
 void clearSensors(){ //clears sensor variables
-  timestamp = 0; //not implemented yet
+  altTemp = 0; //not implemented yet
   altitude = 0;
   Extemp = 0;
   Inttemp = 0;
+  bmp.pressure = 0; //prevent stuck altimeter values on failure
+  bmp.temperature = 0;
   pressure = 0;
   Xaccel = 0;	
   Yaccel = 0;
@@ -119,6 +124,7 @@ void clearSensors(){ //clears sensor variables
 
 void setup() {
   Serial.begin(115200);//kind of high, can change later
+  uv_sensor.setForcedMode(true);
   uv_sensor.begin(); //init UV serial connection
   //bmp filter init
   bmp.begin_I2C(); //init altimeter in software I2C mode
@@ -139,11 +145,11 @@ void loop() {
   clearSensors(); //empty the sensor variables to prevent duplicate values
   readMPU();
   readAltimeter();
-  //uv = uv_sensor.readUVI(); //function from library
-  readTemp(); //will be removed once altimeter is finalized
+  //uv = uv_sensor.readUVI(); //currently interferes with MPU and Altimeter, still looking into it
+  readTemp(); //testing only, altimeter temp will be used in final
   //--------------Data collection code goes above----------
   floatFix(); //must be run to convert float variables to strings
-  sprintf(buffer, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", SMessageNum,Stimestamp,Saltitude,SExtemp,SInttemp,Spressure,SXaccel,SYaccel,SZaccel,SXGyro,SYGyro,SZGyro,Suv);
+  sprintf(buffer, "%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s", SMessageNum,SaltTemp,Saltitude,SExtemp,SInttemp,Spressure,SXaccel,SYaccel,SZaccel,SXGyro,SYGyro,SZGyro,Suv);
   Serial.println(buffer);
   delay(1000); //1s for testing - can go lower but must match the python logging script
   i++;
