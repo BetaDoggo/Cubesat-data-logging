@@ -1,5 +1,4 @@
 pyserial
 google-auth-httplib2
 google-api-python-client
-adafruit-circuitpython-bmp3xx
-adafruit-circuitpython-mpu6050
+adafruit-circuitpython-veml6075

@@ -124,8 +124,8 @@ void clearSensors(){ //clears sensor variables
 
 void setup() {
   Serial.begin(115200);//kind of high, can change later
-  uv_sensor.setForcedMode(true);
-  uv_sensor.begin(); //init UV serial connection
+  //uv_sensor.setForcedMode(true);
+  //uv_sensor.begin(); //init UV serial connection
   //bmp filter init
   bmp.begin_I2C(); //init altimeter in software I2C mode
   bmp.setTemperatureOversampling(BMP3_OVERSAMPLING_8X);
